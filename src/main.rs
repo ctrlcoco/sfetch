@@ -6,18 +6,32 @@ use sysinfo::{self, System};
 
 use std::fmt::Write;
 
-fn get_colors() -> String {
-    let mut colors = String::new();
+fn get_colors1() -> String {
+    let mut colors1 = String::new();
 
-    for i in 8..16 {
-        // Append the formatted string to colors2
-        write!(colors, "\x1b[48;5;{}m   ", i).unwrap();
+    for i in 0..8 {
+        // Append the formatted string to colors1
+        write!(colors1, "\x1b[4{}m   ", i).unwrap();
     }
 
     // Reset the formatting
-    write!(colors, "\x1b[0m").unwrap();
+    write!(colors1, "\x1b[0m").unwrap();
 
-    colors
+    colors1
+}
+
+fn get_colors2() -> String {
+    let mut colors2 = String::new();
+
+    for i in 8..16 {
+        // Append the formatted string to colors2
+        write!(colors2, "\x1b[48;5;{}m   ", i).unwrap();
+    }
+
+    // Reset the formatting
+    write!(colors2, "\x1b[0m").unwrap();
+
+    colors2
 }
 
 // fn main() {
@@ -113,14 +127,14 @@ fn print_system_specs(sys: &mut System) {
     sys.refresh_memory();
 
     match env::var("USER") {
-        Ok(user) => print_spec_value("Name".red(), user.to_string()),
+        Ok(user) => print_spec_value("Name".bright_red(), user.to_string()),
         Err(_) => println!("SHELL environment variable is not set."),
     }
 
-    print_spec_value("Host".blue(), System::host_name().unwrap());
+    print_spec_value("Host".bright_blue(), System::host_name().unwrap());
 
     print_spec_value(
-        "OS".green(),
+        "OS".bright_green(),
         format!(
             "{} {}",
             System::name().unwrap(),
@@ -128,12 +142,12 @@ fn print_system_specs(sys: &mut System) {
         ),
     );
 
-    print_spec_value("Kernel".yellow(), System::kernel_version().unwrap());
+    print_spec_value("Kernel".bright_yellow(), System::kernel_version().unwrap());
 
     sys.refresh_memory();
 
     print_spec_value(
-        "Memory".purple(),
+        "Memory".bright_purple(),
         format!(
             "{}/{}",
             bytes_to_human_readable(sys.total_memory() - sys.used_memory()),
@@ -142,7 +156,7 @@ fn print_system_specs(sys: &mut System) {
     );
 
     print_spec_value(
-        "Swap".cyan(),
+        "Swap".bright_cyan(),
         format!(
             "{}/{}",
             bytes_to_human_readable(sys.used_swap()),
@@ -150,24 +164,25 @@ fn print_system_specs(sys: &mut System) {
         ),
     );
 
-    print_spec_value("Ip".magenta(), get_local_ip());
+    print_spec_value("Ip".bright_magenta(), get_local_ip());
 
-    print_spec_value("Uptime".red(), get_custom_uptime());
+    print_spec_value("Uptime".bright_red(), get_custom_uptime());
 
     match env::var("SHELL") {
         Ok(shell) => print_spec_value(
-            "Shell".green(),
+            "Shell".bright_green(),
             shell.split('/').last().unwrap().to_string(),
         ),
         Err(_) => println!("SHELL environment variable is not set."),
     }
 
     match env::var("TERM") {
-        Ok(term) => print_spec_value("Term".blue(), term),
+        Ok(term) => print_spec_value("Term".bright_yellow(), term),
         Err(_) => println!("TERM environment variable is not set."),
     }
 
-    println!("\n{}", get_colors());
+    println!("{}", get_colors1());
+    println!("{}", get_colors2());
 }
 
 fn main() {
