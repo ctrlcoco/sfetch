@@ -1,31 +1,28 @@
 use colored::Colorize;
 
-use crossterm::{execute, terminal::Clear, terminal::ClearType};
-use std::io::{stdout, Result};
 use sysinfo::{self, System};
 
 use std::{env, fmt::Write, net::UdpSocket};
 
 const UNITS: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
 
-fn clear_term() -> Result<()> {
-    execute!(stdout(), Clear(ClearType::All))?;
-    Ok(())
+fn clear_term() {
+    print!("\x1B[2J\x1B[1;1H");
 }
 
-fn get_normal_colors() -> String {
-    let mut colors1 = String::new();
-
-    for i in 0..8 {
-        // Append the formatted string to colors1
-        write!(colors1, "\x1b[4{}m   ", i).unwrap();
-    }
-
-    // Reset the formatting
-    write!(colors1, "\x1b[0m").unwrap();
-
-    colors1
-}
+// fn get_normal_colors() -> String {
+//     let mut colors1 = String::new();
+//
+//     for i in 0..8 {
+//         // Append the formatted string to colors1
+//         write!(colors1, "\x1b[4{}m   ", i).unwrap();
+//     }
+//
+//     // Reset the formatting
+//     write!(colors1, "\x1b[0m").unwrap();
+//
+//     colors1
+// }
 
 fn get_bright_colors() -> String {
     let mut colors2 = String::new();
@@ -162,18 +159,31 @@ fn print_system_specs(sys: &mut System) {
         Err(_) => println!("TERM environment variable is not set."),
     }
 
-    println!("{}", get_normal_colors());
+    if let Some(de) = get_desktop_environment() {
+        print_spec_value("De/Wm".bright_cyan(), de);
+    }
+
+    // println!("{}", get_normal_colors());
     println!("{}", get_bright_colors());
 }
 
-fn main() {
-    if let Err(e) = clear_term() {
-        println!("error {}", e);
+fn get_desktop_environment() -> Option<String> {
+    // Common environment variables for DE
+    let variables = ["XDG_CURRENT_DESKTOP", "DESKTOP_SESSION", "GDMSESSION"];
+
+    for var in &variables {
+        if let Ok(value) = env::var(var) {
+            return Some(value);
+        }
     }
+    None
+}
+fn main() {
+    clear_term();
 
     let mut sys: System = System::new_all();
 
     print_system_specs(&mut sys);
 
-    println!("\n\n");
+    println!("\n");
 }
