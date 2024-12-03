@@ -1,12 +1,19 @@
 use colored::Colorize;
-use std::env;
-use std::net::UdpSocket;
 
+use crossterm::{execute, terminal::Clear, terminal::ClearType};
+use std::io::{stdout, Result};
 use sysinfo::{self, System};
 
-use std::fmt::Write;
+use std::{env, fmt::Write, net::UdpSocket};
 
-fn get_colors1() -> String {
+const UNITS: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
+
+fn clear_term() -> Result<()> {
+    execute!(stdout(), Clear(ClearType::All))?;
+    Ok(())
+}
+
+fn get_normal_colors() -> String {
     let mut colors1 = String::new();
 
     for i in 0..8 {
@@ -20,44 +27,17 @@ fn get_colors1() -> String {
     colors1
 }
 
-fn get_colors2() -> String {
+fn get_bright_colors() -> String {
     let mut colors2 = String::new();
 
     for i in 8..16 {
-        // Append the formatted string to colors2
         write!(colors2, "\x1b[48;5;{}m   ", i).unwrap();
     }
 
-    // Reset the formatting
     write!(colors2, "\x1b[0m").unwrap();
 
     colors2
 }
-
-// fn main() {
-//     // ASCII Art
-//     let ascii_art = [
-//         "         _______   ",
-//         "        /       \\  ",
-//         "       |  (o) (o) |",
-//         "       |     ^    |",
-//         "        \\_______/ ",
-//     ];
-//
-//     // Corresponding text lines to appear on the right
-//     let text_lines = [
-//         "Rust welcomes you!",
-//         "With some cool art.",
-//         "Stay safe, and code!",
-//         "Let's build together.",
-//         "",
-//     ];
-//
-//     // Display ASCII art and text side-by-side
-//     for (art_line, text_line) in ascii_art.iter().zip(text_lines.iter()) {
-//         println!("{:<20} {}", art_line, text_line);
-//     }
-// }
 
 fn get_custom_uptime() -> String {
     let uptime_seconds = System::uptime();
@@ -106,7 +86,6 @@ fn get_local_ip() -> String {
 }
 
 fn bytes_to_human_readable(bytes: u64) -> String {
-    const UNITS: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
     let mut size = bytes as f64;
     let mut unit = 0;
 
@@ -127,14 +106,17 @@ fn print_system_specs(sys: &mut System) {
     sys.refresh_memory();
 
     match env::var("USER") {
-        Ok(user) => print_spec_value("Name".bright_red(), user.to_string()),
+        Ok(user) => {
+            let to_print = format!("{}@{}", user.to_string(), System::host_name().unwrap());
+            println!("{}", to_print.bright_blue());
+
+            println!("{}", "=".repeat(to_print.len()));
+        }
         Err(_) => println!("SHELL environment variable is not set."),
     }
 
-    print_spec_value("Host".bright_blue(), System::host_name().unwrap());
-
     print_spec_value(
-        "OS".bright_green(),
+        "OS".bright_red(),
         format!(
             "{} {}",
             System::name().unwrap(),
@@ -180,12 +162,18 @@ fn print_system_specs(sys: &mut System) {
         Err(_) => println!("TERM environment variable is not set."),
     }
 
-    println!("{}", get_colors1());
-    println!("{}", get_colors2());
+    println!("{}", get_normal_colors());
+    println!("{}", get_bright_colors());
 }
 
 fn main() {
+    if let Err(e) = clear_term() {
+        println!("error {}", e);
+    }
+
     let mut sys: System = System::new_all();
 
     print_system_specs(&mut sys);
+
+    println!("\n\n");
 }
