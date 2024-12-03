@@ -98,7 +98,7 @@ fn get_local_ip() -> String {
                     "Failed to get local address.".to_string()
                 }
             } else {
-                "Network unreachable or failed to connect.".to_string()
+                "Network unreachable.".to_string()
             }
         }
         Err(_) => "Failed to bind to a socket.".to_string(),
@@ -165,7 +165,6 @@ fn print_system_specs(sys: &mut System) {
     );
 
     print_spec_value("Ip".bright_magenta(), get_local_ip());
-
     print_spec_value("Uptime".bright_red(), get_custom_uptime());
 
     match env::var("SHELL") {
