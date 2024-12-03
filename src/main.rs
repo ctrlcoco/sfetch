@@ -4,6 +4,22 @@ use std::net::UdpSocket;
 
 use sysinfo::{self, System};
 
+use std::fmt::Write;
+
+fn get_colors() -> String {
+    let mut colors = String::new();
+
+    for i in 8..16 {
+        // Append the formatted string to colors2
+        write!(colors, "\x1b[48;5;{}m   ", i).unwrap();
+    }
+
+    // Reset the formatting
+    write!(colors, "\x1b[0m").unwrap();
+
+    colors
+}
+
 // fn main() {
 //     // ASCII Art
 //     let ascii_art = [
@@ -74,7 +90,7 @@ fn get_local_ip() -> String {
         Err(_) => "Failed to bind to a socket.".to_string(),
     }
 }
-// Helper function to format bytes into human-readable units
+
 fn bytes_to_human_readable(bytes: u64) -> String {
     const UNITS: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
     let mut size = bytes as f64;
@@ -90,16 +106,15 @@ fn bytes_to_human_readable(bytes: u64) -> String {
 
 fn print_spec_value(name: colored::ColoredString, value: String) {
     let arrow: colored::ColoredString = "==>".truecolor(112, 112, 112);
-
     println!("{}\t{} {}", name, arrow, value);
 }
 
 fn print_system_specs(sys: &mut System) {
     sys.refresh_memory();
-    if let Some(user) = env::var_os("USER") {
-        print_spec_value("Name".red(), user.into_string().unwrap());
-    } else {
-        println!("Could not determine the current user.");
+
+    match env::var("USER") {
+        Ok(user) => print_spec_value("Name".red(), user.to_string()),
+        Err(_) => println!("SHELL environment variable is not set."),
     }
 
     print_spec_value("Host".blue(), System::host_name().unwrap());
@@ -137,7 +152,22 @@ fn print_system_specs(sys: &mut System) {
 
     print_spec_value("Ip".magenta(), get_local_ip());
 
-    print_spec_value("Uptime".green(), get_custom_uptime());
+    print_spec_value("Uptime".red(), get_custom_uptime());
+
+    match env::var("SHELL") {
+        Ok(shell) => print_spec_value(
+            "Shell".green(),
+            shell.split('/').last().unwrap().to_string(),
+        ),
+        Err(_) => println!("SHELL environment variable is not set."),
+    }
+
+    match env::var("TERM") {
+        Ok(term) => print_spec_value("Term".blue(), term),
+        Err(_) => println!("TERM environment variable is not set."),
+    }
+
+    println!("\n{}", get_colors());
 }
 
 fn main() {
