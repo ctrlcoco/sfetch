@@ -1,13 +1,35 @@
+use colored::Color;
 use colored::Colorize;
-
 use sysinfo::{self, System};
 
 use std::{env, fmt::Write, net::UdpSocket};
 
 const UNITS: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
 
+// const COLORS: [Color; 7] = [
+//     Color::BrightRed,
+//     Color::BrightGreen,
+//     Color::BrightYellow,
+//     Color::BrightBlue,
+//     Color::BrightMagenta,
+//     Color::BrightCyan,
+//     Color::BrightWhite,
+// ];
+
 fn clear_term() {
     print!("\x1B[2J\x1B[1;1H");
+}
+
+fn get_desktop_environment() -> Option<String> {
+    // Common environment variables for DE
+    let variables = ["XDG_CURRENT_DESKTOP", "DESKTOP_SESSION", "GDMSESSION"];
+
+    for var in &variables {
+        if let Ok(value) = env::var(var) {
+            return Some(value);
+        }
+    }
+    None
 }
 
 // fn get_normal_colors() -> String {
@@ -100,12 +122,10 @@ fn print_spec_value(name: colored::ColoredString, value: String) {
 }
 
 fn print_system_specs(sys: &mut System) {
-    sys.refresh_memory();
-
     match env::var("USER") {
         Ok(user) => {
             let to_print = format!("{}@{}", user.to_string(), System::host_name().unwrap());
-            println!("{}", to_print.bright_blue());
+            println!("{}", to_print.color(Color::BrightBlue));
 
             println!("{}", "=".repeat(to_print.len()));
         }
@@ -113,7 +133,7 @@ fn print_system_specs(sys: &mut System) {
     }
 
     print_spec_value(
-        "OS".bright_red(),
+        "OS".color(Color::BrightRed),
         format!(
             "{} {}",
             System::name().unwrap(),
@@ -121,12 +141,15 @@ fn print_system_specs(sys: &mut System) {
         ),
     );
 
-    print_spec_value("Kernel".bright_yellow(), System::kernel_version().unwrap());
+    print_spec_value(
+        "Kernel".color(Color::BrightYellow),
+        System::kernel_version().unwrap(),
+    );
 
     sys.refresh_memory();
 
     print_spec_value(
-        "Memory".bright_purple(),
+        "Memory".color(Color::BrightMagenta),
         format!(
             "{}/{}",
             bytes_to_human_readable(sys.total_memory() - sys.used_memory()),
@@ -135,7 +158,7 @@ fn print_system_specs(sys: &mut System) {
     );
 
     print_spec_value(
-        "Swap".bright_cyan(),
+        "Swap".color(Color::BrightCyan),
         format!(
             "{}/{}",
             bytes_to_human_readable(sys.used_swap()),
@@ -143,41 +166,30 @@ fn print_system_specs(sys: &mut System) {
         ),
     );
 
-    print_spec_value("Ip".bright_magenta(), get_local_ip());
-    print_spec_value("Uptime".bright_red(), get_custom_uptime());
+    print_spec_value("Ip".color(Color::BrightMagenta), get_local_ip());
+    print_spec_value("Uptime".color(Color::BrightRed), get_custom_uptime());
 
     match env::var("SHELL") {
         Ok(shell) => print_spec_value(
-            "Shell".bright_green(),
+            "Shell".color(Color::BrightGreen),
             shell.split('/').last().unwrap().to_string(),
         ),
         Err(_) => println!("SHELL environment variable is not set."),
     }
 
     match env::var("TERM") {
-        Ok(term) => print_spec_value("Term".bright_yellow(), term),
+        Ok(term) => print_spec_value("Term".color(Color::BrightYellow), term),
         Err(_) => println!("TERM environment variable is not set."),
     }
 
     if let Some(de) = get_desktop_environment() {
-        print_spec_value("De/Wm".bright_cyan(), de);
+        print_spec_value("De/Wm".color(Color::BrightCyan), de);
     }
 
     // println!("{}", get_normal_colors());
     println!("{}", get_bright_colors());
 }
 
-fn get_desktop_environment() -> Option<String> {
-    // Common environment variables for DE
-    let variables = ["XDG_CURRENT_DESKTOP", "DESKTOP_SESSION", "GDMSESSION"];
-
-    for var in &variables {
-        if let Ok(value) = env::var(var) {
-            return Some(value);
-        }
-    }
-    None
-}
 fn main() {
     clear_term();
 
