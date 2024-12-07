@@ -5,5 +5,4 @@ edition = "2021"
 
 [dependencies]
 colored = "2.1.0"
-crossterm = "0.28.1"
 sysinfo = "0.32.1"

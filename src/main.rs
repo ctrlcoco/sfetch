@@ -5,16 +5,6 @@ use std::{env, fmt::Write, net::UdpSocket};
 
 const UNITS: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
 
-// const COLORS: [Color; 7] = [
-//     Color::BrightRed,
-//     Color::BrightGreen,
-//     Color::BrightYellow,
-//     Color::BrightBlue,
-//     Color::BrightMagenta,
-//     Color::BrightCyan,
-//     Color::BrightWhite,
-// ];
-
 fn clear_term() {
     print!("\x1B[2J\x1B[1;1H");
 }
