@@ -1,5 +1,4 @@
-use colored::Color;
-use colored::Colorize;
+use colored::{Color, Colorize};
 use sysinfo::{self, System};
 
 use std::{env, fmt::Write, net::UdpSocket};
@@ -32,20 +31,6 @@ fn get_desktop_environment() -> Option<String> {
     None
 }
 
-// fn get_normal_colors() -> String {
-//     let mut colors1 = String::new();
-//
-//     for i in 0..8 {
-//         // Append the formatted string to colors1
-//         write!(colors1, "\x1b[4{}m   ", i).unwrap();
-//     }
-//
-//     // Reset the formatting
-//     write!(colors1, "\x1b[0m").unwrap();
-//
-//     colors1
-// }
-
 fn get_bright_colors() -> String {
     let mut colors2 = String::new();
 
@@ -59,12 +44,12 @@ fn get_bright_colors() -> String {
 }
 
 fn get_custom_uptime() -> String {
-    let uptime_seconds = System::uptime();
+    let uptime_seconds: u64 = System::uptime();
 
-    let days = uptime_seconds / 86400;
-    let hours = (uptime_seconds % 86400) / 3600;
-    let minutes = (uptime_seconds % 3600) / 60;
-    let seconds = uptime_seconds % 60;
+    let days: u64 = uptime_seconds / 86400;
+    let hours: u64 = (uptime_seconds % 86400) / 3600;
+    let minutes: u64 = (uptime_seconds % 3600) / 60;
+    let seconds: u64 = uptime_seconds % 60;
 
     format!(
         "{}{}{}{}",
@@ -105,8 +90,8 @@ fn get_local_ip() -> String {
 }
 
 fn bytes_to_human_readable(bytes: u64) -> String {
-    let mut size = bytes as f64;
-    let mut unit = 0;
+    let mut size: f64 = bytes as f64;
+    let mut unit: usize = 0;
 
     while size >= 1000.0 && unit < UNITS.len() - 1 {
         size /= 1000.0;
@@ -117,16 +102,15 @@ fn bytes_to_human_readable(bytes: u64) -> String {
 }
 
 fn print_spec_value(name: colored::ColoredString, value: String) {
-    let arrow: colored::ColoredString = "==>".truecolor(112, 112, 112);
+    let arrow: colored::ColoredString = "=>".truecolor(112, 112, 112);
     println!("{}\t{} {}", name, arrow, value);
 }
 
 fn print_system_specs(sys: &mut System) {
     match env::var("USER") {
         Ok(user) => {
-            let to_print = format!("{}@{}", user.to_string(), System::host_name().unwrap());
+            let to_print: String = format!("{}@{}", user.to_string(), System::host_name().unwrap());
             println!("{}", to_print.color(Color::BrightBlue));
-
             println!("{}", "=".repeat(to_print.len()));
         }
         Err(_) => println!("SHELL environment variable is not set."),
@@ -186,7 +170,6 @@ fn print_system_specs(sys: &mut System) {
         print_spec_value("De/Wm".color(Color::BrightCyan), de);
     }
 
-    // println!("{}", get_normal_colors());
     println!("{}", get_bright_colors());
 }
 
