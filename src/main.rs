@@ -5,14 +5,14 @@ use sysinfo::{self, System};
 const UNITS: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
 
 // Common environment variables for DE
-const DESTKTOP_ENV_VARS: [&str; 3] = ["XDG_CURRENT_DESKTOP", "DESKTOP_SESSION", "GDMSESSION"];
+const DESKTOP_ENV_VARS: [&str; 3] = ["XDG_CURRENT_DESKTOP", "DESKTOP_SESSION", "GDMSESSION"];
 
 fn clear_term() {
     print!("\x1B[2J\x1B[1;1H");
 }
 
 fn get_desktop_environment() -> Option<String> {
-    for var in &DESTKTOP_ENV_VARS {
+    for var in &DESKTOP_ENV_VARS {
         if let Ok(value) = env::var(var) {
             return Some(value);
         }
@@ -57,20 +57,16 @@ fn get_custom_uptime() -> String {
 }
 
 fn get_local_ip() -> String {
-    match UdpSocket::bind("0.0.0.0:0") {
-        Ok(socket) => {
-            if socket.connect("8.8.8.8:80").is_ok() {
-                if let Ok(local_addr) = socket.local_addr() {
-                    local_addr.ip().to_string()
-                } else {
-                    "Failed to get local address.".to_string()
-                }
-            } else {
-                "Network unreachable.".to_string()
+    if let Ok(socket) = UdpSocket::bind("0.0.0.0:0") {
+        if socket.connect("8.8.8.8:80").is_ok() {
+            if let Ok(local_addr) = socket.local_addr() {
+                return local_addr.ip().to_string();
             }
+            return "Failed to get local address.".into();
         }
-        Err(_) => "Failed to bind to a socket.".to_string(),
+        return "Network unreachable.".into();
     }
+    "Failed to bind to a socket.".into()
 }
 
 fn bytes_to_human_readable(bytes: u64) -> String {
