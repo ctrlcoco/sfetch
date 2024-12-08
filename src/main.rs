@@ -1,19 +1,18 @@
 use colored::{Color, Colorize};
+use std::{env, net::UdpSocket};
 use sysinfo::{self, System};
 
-use std::{env, fmt::Write, net::UdpSocket};
-
 const UNITS: [&str; 5] = ["B", "KB", "MB", "GB", "TB"];
+
+// Common environment variables for DE
+const DESTKTOP_ENV_VARS: [&str; 3] = ["XDG_CURRENT_DESKTOP", "DESKTOP_SESSION", "GDMSESSION"];
 
 fn clear_term() {
     print!("\x1B[2J\x1B[1;1H");
 }
 
 fn get_desktop_environment() -> Option<String> {
-    // Common environment variables for DE
-    let variables = ["XDG_CURRENT_DESKTOP", "DESKTOP_SESSION", "GDMSESSION"];
-
-    for var in &variables {
+    for var in &DESTKTOP_ENV_VARS {
         if let Ok(value) = env::var(var) {
             return Some(value);
         }
@@ -22,15 +21,15 @@ fn get_desktop_environment() -> Option<String> {
 }
 
 fn get_bright_colors() -> String {
-    let mut colors2 = String::new();
-
+    // Preallocate the string with an estimated capacity
+    // 8 colors * 11 chars each + 4 for reset
+    let mut colors = String::with_capacity(8 * 11 + 4);
     for i in 8..16 {
-        write!(colors2, "\x1b[48;5;{}m   ", i).unwrap();
+        colors.push_str(&format!("\x1b[48;5;{}m   ", i));
     }
+    colors.push_str("\x1b[0m");
 
-    write!(colors2, "\x1b[0m").unwrap();
-
-    colors2
+    colors
 }
 
 fn get_custom_uptime() -> String {
@@ -41,25 +40,20 @@ fn get_custom_uptime() -> String {
     let minutes: u64 = (uptime_seconds % 3600) / 60;
     let seconds: u64 = uptime_seconds % 60;
 
-    format!(
-        "{}{}{}{}",
-        if days > 0 {
-            format!("{}d", days)
-        } else {
-            String::new()
-        },
-        if days > 0 || hours > 0 {
-            format!("{}h ", hours)
-        } else {
-            String::new()
-        },
-        if days > 0 || hours > 0 || minutes > 0 {
-            format!("{}m ", minutes)
-        } else {
-            String::new()
-        },
-        format!("{}s", seconds)
-    )
+    let mut uptime_str = String::new();
+
+    if days > 0 {
+        uptime_str.push_str(&format!("{}d ", days));
+    }
+    if days > 0 || hours > 0 {
+        uptime_str.push_str(&format!("{}h ", hours));
+    }
+    if days > 0 || hours > 0 || minutes > 0 {
+        uptime_str.push_str(&format!("{}m ", minutes));
+    }
+    uptime_str.push_str(&format!("{}s", seconds));
+
+    uptime_str
 }
 
 fn get_local_ip() -> String {

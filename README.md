@@ -5,7 +5,7 @@ Written in rust.
 ## Examples
 
 On Linux
-![screenshot](image/Screenshot.png)
+![screenshot](image/Screenshot_macos.png)
 
-On macOs:
-![screenshot](image/Screenshot.png)
+On macOS:
+![screenshot](image/Screenshot_macos.png)

@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-colored = "2.1.0"
-sysinfo = "0.32.1"
+colored = { version = "2.1.0", default-features = false } # Minimal, no additional features
+sysinfo = { version = "0.33.0", features = ["default"] } # Default system info features
