@@ -89,7 +89,7 @@ fn print_spec_value(name: colored::ColoredString, value: String) {
 fn print_system_specs(sys: &mut System) {
     match env::var("USER") {
         Ok(user) => {
-            let to_print: String = format!("{}@{}", user.to_string(), System::host_name().unwrap());
+            let to_print: String = format!("{}@{}", user, System::host_name().unwrap());
             println!("{}", to_print.color(Color::BrightBlue));
             println!("{}", "=".repeat(to_print.len()));
         }
@@ -106,10 +106,10 @@ fn print_system_specs(sys: &mut System) {
     );
 
     print_spec_value(
-        "Kernel".color(Color::BrightYellow),
-        System::kernel_version().unwrap(),
+        "Cpu".color(Color::BrightGreen),
+        format!("{} ", sys.cpus()[0].brand()),
     );
-
+    
     sys.refresh_memory();
 
     print_spec_value(
@@ -149,6 +149,11 @@ fn print_system_specs(sys: &mut System) {
     if let Some(de) = get_desktop_environment() {
         print_spec_value("De/Wm".color(Color::BrightCyan), de);
     }
+
+    print_spec_value(
+        "Kernel".color(Color::BrightYellow),
+        System::kernel_version().unwrap(),
+    );
 
     println!("{}", get_bright_colors());
 }
