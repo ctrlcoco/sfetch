@@ -11,6 +11,11 @@ fn clear_term() {
     print!("\x1B[2J\x1B[1;1H");
 }
 
+fn print_spec_value(name: colored::ColoredString, value: String) {
+    let arrow: colored::ColoredString = "=>".truecolor(112, 112, 112);
+    println!("{}\t{} {}", name, arrow, value);
+}
+
 fn get_desktop_environment() -> Option<String> {
     for var in &DESKTOP_ENV_VARS {
         if let Ok(value) = env::var(var) {
@@ -81,10 +86,7 @@ fn bytes_to_human_readable(bytes: u64) -> String {
     format!("{:.2} {}", size, UNITS[unit])
 }
 
-fn print_spec_value(name: colored::ColoredString, value: String) {
-    let arrow: colored::ColoredString = "=>".truecolor(112, 112, 112);
-    println!("{}\t{} {}", name, arrow, value);
-}
+
 
 fn print_system_specs(sys: &mut System) {
     match env::var("USER") {
@@ -109,11 +111,11 @@ fn print_system_specs(sys: &mut System) {
         "Cpu".color(Color::BrightGreen),
         format!("{} ", sys.cpus()[0].brand()),
     );
-    
+
     sys.refresh_memory();
 
     print_spec_value(
-        "Memory".color(Color::BrightMagenta),
+        "Memory".color(Color::BrightYellow),
         format!(
             "{}/{}",
             bytes_to_human_readable(sys.total_memory() - sys.used_memory()),
@@ -151,7 +153,7 @@ fn print_system_specs(sys: &mut System) {
     }
 
     print_spec_value(
-        "Kernel".color(Color::BrightYellow),
+        "Kernel".color(Color::BrightMagenta),
         System::kernel_version().unwrap(),
     );
 
