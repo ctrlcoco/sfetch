@@ -86,8 +86,6 @@ fn bytes_to_human_readable(bytes: u64) -> String {
     format!("{:.2} {}", size, UNITS[unit])
 }
 
-
-
 fn print_system_specs(sys: &mut System) {
     match env::var("USER") {
         Ok(user) => {
@@ -160,12 +158,47 @@ fn print_system_specs(sys: &mut System) {
     println!("{}", get_bright_colors());
 }
 
+fn help() {
+    println!(
+        "usage:
+    sfetch
+
+    [options]
+    -v | --version to see version info
+    -h | --help to get this message and exit
+    "
+    );
+}
+
+
 fn main() {
-    clear_term();
+    let args: Vec<String> = env::args().collect();
 
-    let mut sys: System = System::new_all();
+    match args.len() {
+        2 => {
+            let text: &str = &args[1];
 
-    print_system_specs(&mut sys);
+            // checks flag
+            match text {
+                "--help" | "-h" => help(),
+                "--version" | "-v" => {
+                    println!("sfetch {}", env!("CARGO_PKG_VERSION"));
+                }
 
-    println!("\n");
+                _ => {
+                    println!("Unknown flag: {}", text);
+                }
+            }
+        }
+
+        _ => {
+            clear_term();
+
+            let mut sys: System = System::new_all();
+
+            print_system_specs(&mut sys);
+
+            println!("\n");
+        }
+    }
 }
