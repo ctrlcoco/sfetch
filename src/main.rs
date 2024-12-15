@@ -141,17 +141,13 @@ fn print_system_specs(sys: &mut System) {
         Err(_) => println!("SHELL environment variable is not set."),
     }
 
-    match env::var("TERM") {
-        Ok(term) => print_spec_value("Term".color(Color::BrightYellow), term),
-        Err(_) => println!("TERM environment variable is not set."),
-    }
 
     if let Some(de) = get_desktop_environment() {
         print_spec_value("De/Wm".color(Color::BrightCyan), de);
     }
 
     print_spec_value(
-        "Kernel".color(Color::BrightMagenta),
+        "Kernel".color(Color::BrightYellow),
         System::kernel_version().unwrap(),
     );
 
