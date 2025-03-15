@@ -87,13 +87,10 @@ fn bytes_to_human_readable(bytes: u64) -> String {
 }
 
 fn print_system_specs(sys: &mut System) {
-    match env::var("USER") {
-        Ok(user) => {
-            let to_print: String = format!("{}@{}", user, System::host_name().unwrap());
-            println!("{}", to_print.color(Color::BrightBlue));
-            println!("{}", "=".repeat(to_print.len()));
-        }
-        Err(_) => println!("SHELL environment variable is not set."),
+    if let Ok(user) = env::var("USER") {
+        let to_print: String = format!("{}@{}", user, System::host_name().unwrap());
+        println!("{}", to_print.color(Color::BrightBlue));
+        println!("{}", "=".repeat(to_print.len()));
     }
 
     print_spec_value(
@@ -133,14 +130,12 @@ fn print_system_specs(sys: &mut System) {
     print_spec_value("Ip".color(Color::BrightMagenta), get_local_ip());
     print_spec_value("Uptime".color(Color::BrightRed), get_custom_uptime());
 
-    match env::var("SHELL") {
-        Ok(shell) => print_spec_value(
+    if let Ok(shell) = env::var("SHELL") {
+        print_spec_value(
             "Shell".color(Color::BrightGreen),
             shell.split('/').last().unwrap().to_string(),
-        ),
-        Err(_) => println!("SHELL environment variable is not set."),
+        )
     }
-
 
     if let Some(de) = get_desktop_environment() {
         print_spec_value("De/Wm".color(Color::BrightCyan), de);
@@ -160,8 +155,8 @@ fn help() {
     sfetch
 
     [options]
-    -v | --version to see version info
-    -h | --help to get this message and exit
+    -v | --version   print version info
+    -h | --help to   print this message and exit
     "
     );
 }
@@ -171,28 +166,24 @@ fn main() {
 
     match args.len() {
         2 => {
-            let text: &str = &args[1];
+            let flag: &str = &args[1];
 
-            // checks flag
-            match text {
+            match flag {
                 "--help" | "-h" => help(),
                 "--version" | "-v" => {
                     println!("sfetch {}", env!("CARGO_PKG_VERSION"));
                 }
 
                 _ => {
-                    println!("Unknown flag: {}", text);
+                    println!("Unknown flag: {}", flag);
                 }
             }
         }
 
         _ => {
             clear_term();
-
             let mut sys: System = System::new_all();
-
             print_system_specs(&mut sys);
-
             println!("\n");
         }
     }
